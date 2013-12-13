@@ -1,0 +1,82 @@
+-
+    prefix: ~
+    routes:
+        -
+            name: index
+            controller: main
+            action: Index
+            pattern: /
+        -
+            name: about
+            controller: main
+            action: About
+            pattern: /about
+
+-
+    prefix: /topic
+    routes:
+        -
+            name: topic_show
+            controller: topic
+            action: Show 
+            pattern: /(\d+)
+            keys: [id]
+
+-
+    prefix: /comment
+    routes:
+        -
+            name: comment_new
+            controller: comment
+            action: New
+            pattern: /new
+
+-
+    prefix: /admin
+    routes:
+        -
+            name: sigunup
+            controller: admin_user
+            action: Signup
+            pattern: /signup
+
+        -
+            name: signin
+            controller: admin_user
+            action: Signin
+            pattern: /signin
+
+        - 
+            name: setting
+            controller: admin_user
+            action: Setting
+            pattern: /setting
+
+
+-
+    prefix: /admin/topic
+    routes:
+        -
+            name: admin_topics
+            controller: admin_topic
+            action: List
+            pattern: /
+        
+        -
+            name: admin_topic_new
+            controller: admin_topic
+            action: New
+            pattern: /new
+        
+        -
+            name: admin_topics
+            controller: admin_topic
+            action: Show 
+            pattern: /
+        
+        -
+            name: admin_topic_edit
+            controller: admin_topic
+            action: Edit
+            pattern: /(\d+)/edit
+            keys: [id]

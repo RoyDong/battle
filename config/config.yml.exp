@@ -1,0 +1,20 @@
+name: Topics
+env: prod
+
+sock: /run/potato.socket
+port: 37221
+
+
+log_dir: log/
+
+error_handler:
+    not_found: {controller: Error, action: NotFound}
+    server_error: {controller: Error, action: ServerError}
+
+
+sql:
+    host: localhost
+    port: 3306
+    user: root
+    pass: 123
+    dbname: topic
