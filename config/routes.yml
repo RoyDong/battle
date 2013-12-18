@@ -13,14 +13,13 @@
             pattern: /about
 
 -
-    prefix: /topic
+    prefix: /ws
     routes:
         -
-            name: topic_show
-            controller: topic
-            action: Show 
-            pattern: /(\d+)
-            keys: [id]
+            name: ws_index
+            controller: main
+            action: Ws
+            pattern: /ws
 
 -
     prefix: /comment
