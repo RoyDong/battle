@@ -12,7 +12,7 @@ const (
 
 type Unit struct {
     id int64
-    level int64
+    Level int64
     State int
     CreatedAt, UpdatedAt int64
 }
