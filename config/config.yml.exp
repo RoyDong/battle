@@ -7,10 +7,6 @@ port: 37221
 
 log_dir: log/
 
-error_handler:
-    not_found: {controller: Error, action: NotFound}
-    server_error: {controller: Error, action: ServerError}
-
 
 sql:
     host: localhost
