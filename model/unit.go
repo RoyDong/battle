@@ -16,5 +16,3 @@ type Unit struct {
     State int
     CreatedAt, UpdatedAt int64
 }
-
-

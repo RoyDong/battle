@@ -7,15 +7,6 @@
             action: Index
             pattern: /
         -
-            name: about
-            controller: main
-            action: About
-            pattern: /about
-
--
-    prefix: /ws
-    routes:
-        -
             name: ws_index
             controller: main
             action: Ws

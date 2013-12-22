@@ -10,14 +10,14 @@ func init() {
     potato.Init()
 
     //define template funcs
-    potato.T.SetFuncs(map[string]interface{} {
-    })
+    potato.T.SetFuncs(map[string]interface{} {})
 
     //the map keys here must corresponds with 
     //the controller configured in routes.yml
     potato.R.SetControllers(map[string]interface{} {
         "main": new(controller.Main),
     })
+
 }
 
 func main() {

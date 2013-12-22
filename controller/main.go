@@ -1,9 +1,7 @@
 package controller
 
 import (
-    "log"
     "github.com/roydong/potato"
-    ws "code.google.com/p/go.net/websocket"
 )
 
 type Main struct {
@@ -15,15 +13,17 @@ func (c *Main) Index() {
 }
 
 func (c *Main) Ws() {
-    conn := c.Request.WSConn
-    var a string
-
     for {
-        if err := ws.Message.Receive(conn, &a); err != nil {
-            log.Println(err)
+        txt := c.WSReceive()
+
+        if len(txt) == 0 {
+            return
         }
 
-        log.Println(a)
-        ws.Message.Send(conn, a)
+        c.WSSendJson(map[string]interface{} {
+            "message": "ok",
+            "error": 0,
+            "data": txt,
+        })
     }
 }
