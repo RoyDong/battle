@@ -2,6 +2,7 @@ package controller
 
 import (
     "github.com/roydong/potato"
+    "github.com/roydong/potato/db"
 )
 
 type Main struct {
@@ -9,7 +10,16 @@ type Main struct {
 }
 
 func (c *Main) Index() {
-    c.RenderJson("111")
+    stmt := new(db.Stmt)
+    stmt.Select("*").
+        From("user", "u").
+        Where(stmt.And("u.id = :id")).
+        Order("u.updated_at", "desc").
+        Offset(1).
+        Limit(2)
+
+    c.RenderJson(stmt.String())
+
 }
 
 func (c *Main) Ws() {
