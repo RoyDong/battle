@@ -4,10 +4,12 @@ package main
 import (
     "github.com/roydong/potato"
     "github.com/roydong/battle/controller"
+    "github.com/roydong/potato/orm"
 )
 
 func init() {
     potato.Init()
+    orm.Init(potato.D, potato.L)
 
     //define template funcs
     potato.T.SetFuncs(map[string]interface{} {})
@@ -17,7 +19,6 @@ func init() {
     potato.R.SetControllers(map[string]interface{} {
         "main": new(controller.Main),
     })
-
 }
 
 func main() {

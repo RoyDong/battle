@@ -1,25 +1,29 @@
 package controller
 
 import (
+    "log"
     "github.com/roydong/potato"
-    "github.com/roydong/potato/db"
+    "github.com/roydong/potato/orm"
 )
 
 type Main struct {
     potato.Controller
 }
 
+type A struct {
+    a string `sql:"a"`
+}
+type B struct {
+    b string `sql:"b"`
+}
+
 func (c *Main) Index() {
-    stmt := new(db.Stmt)
-    stmt.Select("*").
-        From("user", "u").
-        Where(stmt.And("u.id = :id")).
-        Order("u.updated_at", "desc").
-        Offset(1).
-        Limit(2)
+    var a A
+    var b B
 
-    c.RenderJson(stmt.String())
-
+    r := new(orm.Rows)
+    r.Scan(&a, &b)
+    log.Println(a, b)
 }
 
 func (c *Main) Ws() {
