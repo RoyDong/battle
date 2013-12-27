@@ -10,20 +10,11 @@ type Main struct {
     potato.Controller
 }
 
-type A struct {
-    a string `sql:"a"`
-}
-type B struct {
-    b string `sql:"b"`
-}
-
 func (c *Main) Index() {
-    var a A
-    var b B
-
-    r := new(orm.Rows)
-    r.Scan(&a, &b)
-    log.Println(a, b)
+    stmt := orm.NewStmt()
+    stmt.Select("u.id, u.name, s.id").From("User", "u").LeftJoin("User", "s", "s.id = :sid").Where("u.id = :id")
+    log.Println(1)
+    c.Response.Write([]byte(stmt.String()))
 }
 
 func (c *Main) Ws() {
