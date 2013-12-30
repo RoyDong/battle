@@ -3,8 +3,8 @@ package main
 
 import (
     "github.com/roydong/potato"
-    "github.com/roydong/battle/controller"
     "github.com/roydong/potato/orm"
+    "github.com/roydong/battle/controller"
 )
 
 func init() {

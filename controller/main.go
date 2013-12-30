@@ -12,12 +12,12 @@ type Main struct {
 }
 
 type Topic struct {
-    Id int64 `name:"id", type:"int64"`
-    Title string `name:"title", type:"string"`
-    Content string `name:"content", type:"string"`
-    State int `name:"state", type:"int64"`
-    CreatedAt time.Time `name:"created_at", type:"time"`
-    UpdatedAt time.Time `name:"updated_at", type:"time"`
+    Id int64 `id`
+    Title string `title`
+    Content string `content`
+    State int `state`
+    CreatedAt time.Time `created_at`
+    UpdatedAt time.Time `updated_at`
 }
 
 type topicModel struct {
