@@ -1,7 +1,7 @@
 name: Topics
 env: dev
 
-sock: /run/potato.socket
+sock_file: /run/potato.socket
 port: 37221
 
 
