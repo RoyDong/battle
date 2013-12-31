@@ -28,7 +28,7 @@ var TopicModel = &topicModel{orm.NewModel("topic", new(Topic))}
 
 func (c *Main) Index() {
     stmt := orm.NewStmt()
-    rows, e := stmt.Select("t.*").From("Topic", "t").Desc("id").Limit(2).Query(nil)
+    rows, e := stmt.Select("t.*").From("Topic t").Asc("t.id").Limit(4).Query(nil)
 
     if e != nil {
         log.Println(e)
@@ -41,9 +41,16 @@ func (c *Main) Index() {
         topics = append(topics, t)
     }
 
-    n := orm.NewStmt().Count("Topic", "t").QueryNum(nil)
+    n := stmt.Clear().Count("Topic t").Exec(nil)
 
-    log.Println(n)
+    m := stmt.Clear().Update("Topic t").
+        Set("t.title = :t").Where("t.id = :id").
+        Exec(map[string]interface{} {"t": "title is changed 1", "id": 1})
+
+    i := stmt.Clear().Delete("Topic").Where("id = :id").
+        Exec(map[string]interface{} {"id": 1})
+
+    log.Println(n, m, i)
 
     c.RenderJson(topics)
 }
