@@ -12,12 +12,12 @@ type Main struct {
 }
 
 type Topic struct {
-    Id int64 `column:"id"`
-    Title string `column:"title"`
-    Content string `column:"content"`
-    State int `column:"state"`
-    CreatedAt time.Time `column:"created_at"`
-    UpdatedAt time.Time `column:"updated_at"`
+    Id int64 `column:"id" type:"int" json:"id"`
+    Title string `column:"title" type:"string" json:"title"`
+    Content string `column:"content" type:"string" json:"content"`
+    State int `column:"state" type:"int" json:"state"`
+    CreatedAt time.Time `column:"created_at" type:"time" json:"created_at"`
+    UpdatedAt time.Time `column:"updated_at" type:"time" json"updated_at"`
 }
 
 type topicModel struct {
@@ -28,21 +28,24 @@ var TopicModel = &topicModel{orm.NewModel("topic", new(Topic))}
 
 func (c *Main) Index() {
     stmt := orm.NewStmt()
-    stmt.Select("t.id, t.title, t.content, t.state, t.created_at, t.updated_at").
-        From("Topic", "t").
-        Where("t.id = :id").
-        Query(map[string]interface{} {"id": 1})
+    rows, e := stmt.Select("t.*").From("Topic", "t").Desc("id").Limit(2).Query(nil)
 
-    log.Println("--")
-        /*
-    var t Topic
+    if e != nil {
+        log.Println(e)
+    }
 
-    e := rows.Scan(&t)
+    topics := make([]*Topic, 0, 2)
+    for rows.Next() {
+        var t *Topic
+        rows.ScanStruct(&t)
+        topics = append(topics, t)
+    }
 
-    log.Println(t, e)
-    
-    */
-    c.Response.Write([]byte(stmt.String()))
+    n := orm.NewStmt().Count("Topic", "t").QueryNum(nil)
+
+    log.Println(n)
+
+    c.RenderJson(topics)
 }
 
 func (c *Main) Ws() {

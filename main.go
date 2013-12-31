@@ -3,13 +3,12 @@ package main
 
 import (
     "github.com/roydong/potato"
-    "github.com/roydong/potato/orm"
     "github.com/roydong/battle/controller"
+    _"github.com/go-sql-driver/mysql"
 )
 
 func init() {
     potato.Init()
-    orm.Init(potato.D, potato.L)
 
     //define template funcs
     potato.T.SetFuncs(map[string]interface{} {})
