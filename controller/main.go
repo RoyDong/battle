@@ -27,30 +27,27 @@ type topicModel struct {
 var TopicModel = &topicModel{orm.NewModel("topic", new(Topic))}
 
 func (c *Main) Index() {
-    stmt := orm.NewStmt()
-    rows, e := stmt.Select("t.*").From("Topic t").Asc("t.id").Limit(4).Query(nil)
-
+    rows, e := orm.NewStmt().Select("t.*").From("Topic", "t").Desc("t.id").Query(nil)
     if e != nil {
-        log.Println(e)
+        log.Println(e, 1)
     }
 
-    topics := make([]*Topic, 0, 2)
+    topics := make([]*Topic, 0, 5)
     for rows.Next() {
         var t *Topic
-        rows.ScanStruct(&t)
+
+        rows.ScanEntity(&t)
+
+        t.State = 2
+        if t.Id == 12 {
+            t.Id = 103
+            t.Title = potato.RandString(10)
+            t.UpdatedAt = time.Now()
+            log.Println(orm.Save(t))
+        }
+
         topics = append(topics, t)
     }
-
-    n := stmt.Clear().Count("Topic t").Exec(nil)
-
-    m := stmt.Clear().Update("Topic t").
-        Set("t.title = :t").Where("t.id = :id").
-        Exec(map[string]interface{} {"t": "title is changed 1", "id": 1})
-
-    i := stmt.Clear().Delete("Topic").Where("id = :id").
-        Exec(map[string]interface{} {"id": 1})
-
-    log.Println(n, m, i)
 
     c.RenderJson(topics)
 }
