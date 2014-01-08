@@ -27,10 +27,13 @@ type topicModel struct {
 var TopicModel = &topicModel{orm.NewModel("topic", new(Topic))}
 
 func (c *Main) Index() {
-    rows, e := orm.NewStmt().Select("t.*").From("Topic", "t").Desc("t.id").Query(nil)
+    rows, e := orm.NewStmt().Select("t.*").From("Topic", "t").Desc("t.id").Query()
     if e != nil {
         log.Println(e, 1)
     }
+
+    orm.NewStmt().Insert("Topic", "title", "content").Exec("aaa", "ddddd")
+    orm.NewStmt().Update("Topic", "t", "title", "content").Where("id=?").Exec("aadd", "ccccccc", 13)
 
     topics := make([]*Topic, 0, 5)
     for rows.Next() {
