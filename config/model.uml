@@ -1,0 +1,16 @@
+
+GeoLand = 0
+GeoSea  = 1
+
+location:
+    id: int
+    x: int
+    y: int
+    geo: int GeoLand GeoSea
+    fort: Fort or null
+
+Fort:
+    id: int
+    location
+
+
