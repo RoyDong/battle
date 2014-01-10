@@ -4,10 +4,9 @@ import (
     "io"
     "time"
     "crypto/rand"
-    "crypto/md5"
     "crypto/sha512"
     "encoding/hex"
-    "github.com/roydong/potato"
+    "github.com/roydong/potato/orm"
 )
 
 type User struct {
@@ -27,12 +26,12 @@ func (u *User) SetPasswd(passwd string) {
         panic("could not generate random salt")
     }
 
-    hash := md5.New()
+    hash := sha512.New()
     if _, e := hash.Write(rnd); e != nil {
         panic("could not hash salt")
     }
 
-    u.Salt = hex.EncodeToString(hash.Sum(nil))
+    u.Salt = hex.EncodeToString(hash.Sum(nil))[:32]
     u.Passwd = UserModel.HashPasswd(passwd, u.Salt)
 }
 
@@ -48,8 +47,8 @@ var UserModel = &userModel{orm.NewModel("user", new(User))}
 
 func (m *userModel) User(id int64) *User {
     var u *User
-    rows, e := orm.NewStmt().Select("u.*").From("User", "u").
-            Where(fmt.Sprintf("u.id = %d", id)).Query(nil)
+    rows, e := orm.NewStmt().Select("u.*").
+            From("User", "u").Where("u.id = ?").Query(id)
 
     if e == nil && rows.Next() {
         rows.ScanEntity(&u)
@@ -60,8 +59,8 @@ func (m *userModel) User(id int64) *User {
 
 func (m *userModel) UserByEmail(email string) *User {
     var u *User
-    rows, e := orm.NewStmt().Select("u.*").From("User", "u").
-            Where("u.email = :e").Query(map[string]interface{}{"e": email})
+    rows, e := orm.NewStmt().Select("u.*").
+            From("User", "u").Where("u.email = ?").Query(email)
 
     if e == nil && rows.Next() {
         rows.ScanEntity(&u)
@@ -73,7 +72,7 @@ func (m *userModel) UserByEmail(email string) *User {
 
 func (m *userModel) Exists(email string) bool {
     n,_ := orm.NewStmt().Count("User", "u").
-            Where(fmt.Sprintf("u.email = '%s'", email)).Exec(nil)
+            Where("u.email = ?").Exec(email)
 
     return n > 0
 }

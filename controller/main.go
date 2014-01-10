@@ -12,12 +12,12 @@ type Main struct {
 }
 
 type Topic struct {
-    Id int64 `column:"id" type:"int" json:"id"`
-    Title string `column:"title" type:"string" json:"title"`
-    Content string `column:"content" type:"string" json:"content"`
-    State int `column:"state" type:"int" json:"state"`
-    CreatedAt time.Time `column:"created_at" type:"time" json:"created_at"`
-    UpdatedAt time.Time `column:"updated_at" type:"time" json"updated_at"`
+    Id int64 `column:"id" json:"id"`
+    Title string `column:"title" json:"title"`
+    Content string `column:"content" json:"content"`
+    State int `column:"state" json:"state"`
+    CreatedAt time.Time `column:"created_at" json:"created_at"`
+    UpdatedAt time.Time `column:"updated_at" json:"updated_at"`
 }
 
 type topicModel struct {
@@ -31,6 +31,7 @@ func (c *Main) Index() {
     if e != nil {
         log.Println(e, 1)
     }
+
 
     orm.NewStmt().Insert("Topic", "title", "content").Exec("aaa", "ddddd")
     orm.NewStmt().Update("Topic", "t", "title", "content").Where("id=?").Exec("aadd", "ccccccc", 13)

@@ -1,7 +1,7 @@
 package model
 
 import (
-    "github.com/roydong/potato"
+    "github.com/roydong/potato/orm"
 )
 
 const (
@@ -11,8 +11,11 @@ const (
 )
 
 type Unit struct {
-    id int64
-    Level int64
-    State int
-    CreatedAt, UpdatedAt int64
+    Id int64 `column:"id"`
+    Level int64 `column:"level"`
+    State int `column:"state"`
+    CreatedAt int64 `column:"created_at"`
+    UpdatedAt int64 `column:"updated_at"`
 }
+
+
