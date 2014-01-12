@@ -2,15 +2,32 @@
 GeoLand = 0
 GeoSea  = 1
 
-location:
+User:
+    id: int
+    name: string
+    title: string
+    titles: string...
+
+Location:
     id: int
     x: int
     y: int
-    geo: int GeoLand GeoSea
-    fort: Fort or null
+    geo: GeoLand, GeoSea
+
 
 Fort:
     id: int
-    location
+    location: Location
+    owner: User
+    structures: Structure...
+
+
+Unit:
+    id: int
+    fort: Fort
+    location: Location
+
+
+    
 
 
