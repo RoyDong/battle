@@ -1,28 +1,27 @@
 package model
 
 import (
-    "io"
-    "time"
     "crypto/rand"
     "crypto/sha512"
     "encoding/hex"
     "github.com/roydong/potato/orm"
+    "io"
+    "time"
 )
 
 type User struct {
-    Id int64 `column:"id"`
-    Passwd string `column:"passwd"`
-    Salt string `column:"salt"`
-    Name string `column:"name"`
-    Email string `column:"email"`
+    Id        int64     `column:"id"`
+    Passwd    string    `column:"passwd"`
+    Salt      string    `column:"salt"`
+    Name      string    `column:"name"`
+    Email     string    `column:"email"`
     CreatedAt time.Time `column:"created_at"`
     UpdatedAt time.Time `column:"updated_at"`
 }
 
-
 func (u *User) SetPasswd(passwd string) {
     rnd := make([]byte, 32)
-    if _,e := io.ReadFull(rand.Reader, rnd); e != nil {
+    if _, e := io.ReadFull(rand.Reader, rnd); e != nil {
         panic("could not generate random salt")
     }
 
@@ -48,7 +47,7 @@ var UserModel = &userModel{orm.NewModel("user", new(User))}
 func (m *userModel) User(id int64) *User {
     var u *User
     rows, e := orm.NewStmt().Select("u.*").
-            From("User", "u").Where("u.id = ?").Query(id)
+        From("User", "u").Where("u.id = ?").Query(id)
 
     if e == nil && rows.Next() {
         rows.ScanEntity(&u)
@@ -60,7 +59,7 @@ func (m *userModel) User(id int64) *User {
 func (m *userModel) UserByEmail(email string) *User {
     var u *User
     rows, e := orm.NewStmt().Select("u.*").
-            From("User", "u").Where("u.email = ?").Query(email)
+        From("User", "u").Where("u.email = ?").Query(email)
 
     if e == nil && rows.Next() {
         rows.ScanEntity(&u)
@@ -69,14 +68,12 @@ func (m *userModel) UserByEmail(email string) *User {
     return u
 }
 
-
 func (m *userModel) Exists(email string) bool {
-    n,_ := orm.NewStmt().Count("User", "u").
-            Where("u.email = ?").Exec(email)
+    n, _ := orm.NewStmt().Count("User", "u").
+        Where("u.email = ?").Exec(email)
 
     return n > 0
 }
-
 
 func (m *userModel) HashPasswd(passwd string, salt string) string {
     hash := sha512.New()

@@ -1,8 +1,6 @@
 package model
 
-import (
-)
-
+import ()
 
 type Fort struct {
     BaseUnit
@@ -11,4 +9,3 @@ type Fort struct {
 func (f *Fort) Build(loc Location) {
 
 }
-

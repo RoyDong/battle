@@ -1,10 +1,10 @@
 package controller
 
 import (
-    "log"
-    "time"
     "github.com/roydong/potato"
     "github.com/roydong/potato/orm"
+    "log"
+    "time"
 )
 
 type Main struct {
@@ -12,10 +12,10 @@ type Main struct {
 }
 
 type Topic struct {
-    Id int64 `column:"id" json:"id"`
-    Title string `column:"title" json:"title"`
-    Content string `column:"content" json:"content"`
-    State int `column:"state" json:"state"`
+    Id        int64     `column:"id" json:"id"`
+    Title     string    `column:"title" json:"title"`
+    Content   string    `column:"content" json:"content"`
+    State     int       `column:"state" json:"state"`
     CreatedAt time.Time `column:"created_at" json:"created_at"`
     UpdatedAt time.Time `column:"updated_at" json:"updated_at"`
 }
@@ -31,7 +31,6 @@ func (c *Main) Index() {
     if e != nil {
         log.Println(e, 1)
     }
-
 
     orm.NewStmt().Insert("Topic", "title", "content").Exec("aaa", "ddddd")
     orm.NewStmt().Update("Topic", "t", "title", "content").Where("id=?").Exec("aadd", "ccccccc", 13)
@@ -64,10 +63,10 @@ func (c *Main) Ws() {
             return
         }
 
-        c.WSSendJson(map[string]interface{} {
+        c.WSSendJson(map[string]interface{}{
             "message": "ok",
-            "error": 0,
-            "data": txt,
+            "error":   0,
+            "data":    txt,
         })
     }
 }
