@@ -18,7 +18,7 @@ const (
 type BaseUnit struct {
     Id        int64     `column:"id"`
     Hp        int64     `column:"hp"`
-    Dp        int64     `column:"dp"`
+    Armor     int64     `column:"armor"`
     Level     int64     `column:"level"`
     State     int       `column:"state"`
     X         int64     `column:"x"`
@@ -35,3 +35,4 @@ type Weapon struct {
     Interval   int
     Damage     int64
 }
+

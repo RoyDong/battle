@@ -1,11 +1,37 @@
 package model
 
-import ()
+import (
+    "errors"
+)
 
 type Fort struct {
     BaseUnit
 }
 
-func (f *Fort) Build(loc Location) {
+type Main struct {
+
+}
+
+type Lab struct {
+
+}
+
+type Armory struct {
+
+}
+
+type Storage struct {
+
+}
+
+type Supply struct {
+
+}
+
+type Stope struct {
+
+}
+
+type Unit struct {
 
 }
