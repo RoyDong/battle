@@ -2,14 +2,12 @@ package main
 
 import (
     _ "github.com/go-sql-driver/mysql"
-    "github.com/roydong/battle/controller"
     "github.com/roydong/potato"
-    "github.com/roydong/potato/orm"
+    "github.com/roydong/battle/controller"
 )
 
 func init() {
     potato.Init()
-    orm.InitDefault()
 }
 
 func main() {
