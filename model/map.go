@@ -164,12 +164,10 @@ func (m *mapModel) Location(x, y int64) *Location {
 
 func (m *mapModel) Save(loc *Location) bool {
     _, e := orm.NewStmt().
-        Update("Location", "l",
-        "geo", "base_id", "metal", "energy",
-        "created_at", "updated_at", "refresh_at").
+        Update("Location", "l", "geo", "base_id", "metal",
+        "energy", "created_at", "updated_at", "refresh_at").
         Where("l.x = ? AND l.y = ?").
-        Exec(loc.Geo, loc.BaseId,
-        loc.Metal, loc.Energy,
+        Exec(loc.Geo, loc.BaseId, loc.Metal, loc.Energy,
         loc.CreatedAt, loc.UpdatedAt, loc.RefreshAt)
 
     return e == nil
