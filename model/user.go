@@ -38,7 +38,6 @@ func (u *User) CheckPasswd(passwd string) bool {
     return UserModel.HashPasswd(passwd, u.Salt) == u.Passwd
 }
 
-
 /**
  * user model
  */

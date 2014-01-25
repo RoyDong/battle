@@ -2,8 +2,8 @@ package main
 
 import (
     _ "github.com/go-sql-driver/mysql"
-    "github.com/roydong/potato"
     "github.com/roydong/battle/controller"
+    "github.com/roydong/potato"
 )
 
 func init() {

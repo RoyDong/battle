@@ -35,4 +35,3 @@ type Weapon struct {
     Interval   int
     Damage     int64
 }
-
