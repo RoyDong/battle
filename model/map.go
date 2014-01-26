@@ -3,6 +3,8 @@ package model
 import (
     "github.com/roydong/potato/orm"
     "math/rand"
+    "strings"
+    "fmt"
     "sync"
     "time"
 )
@@ -14,19 +16,15 @@ const (
     MapSizeX = 1000
     MapSizeY = 1000
 
-    MapRefreshInterval = 500 * time.Millisecond
+    MapRefreshInterval = time.Second
 )
 
 var (
     LocResourceRate = 5
-    LocMetalRate    = 70
     LocEnergyRate   = 30
 
-    LocMetalMax = 500
-    LocMetalMin = 100
-
-    LocEnergyMax = 500
-    LocEnergyMin = 100
+    LocResourceMax = 500
+    LocResourceMin = 100
 )
 
 type Location struct {
@@ -62,9 +60,8 @@ func newMapModel() *mapModel {
         elocker: &sync.Mutex{},
     }
 
-    m.metal = m.Sum("metal")
-    m.energy = m.Sum("energy")
-    go m.refresh()
+    m.Sum([]string{"metal", "energy"}, &m.metal, &m.energy)
+    go m.Refresh()
     return m
 }
 
@@ -92,53 +89,48 @@ func (m *mapModel) Resource() int64 {
     return m.metal + m.energy
 }
 
-func (m *mapModel) refresh() {
-    rate := LocResourceRate
-    num := 0
-
+func (m *mapModel) Refresh() {
     for now := range time.Tick(MapRefreshInterval) {
         rows, e := orm.NewStmt().
             Select("l.*").From("Location", "l").
             Where("l.base_id = 0").
             Asc("l.refresh_at").Asc("l.x").Asc("l.y").
-            Limit(1).Query()
+            Limit(10).Query()
 
-        var loc *Location
-        if e != nil || rows.ScanRow(&loc) != nil {
+        if e != nil {
+            orm.L.Println(e)
             continue
         }
 
-        metal, energy := loc.Metal, loc.Energy
-        if rand.Intn(100) < rate {
-            rate = LocResourceRate
-            num = 0
+        for rows.Next() {
+            var loc *Location
+            if rows.ScanEntity(&loc) != nil {
+                continue
+            }
 
-            if rand.Intn(100) < LocMetalRate {
+            metal, energy := loc.Metal, loc.Energy
+            if rand.Intn(100) < LocResourceRate {
                 n := rand.Intn(100)
-                loc.Metal = int64(LocMetalMin +
-                    (LocMetalMax - LocMetalMin) * n / 100)
+                total := int64(LocResourceMin +
+                    (LocResourceMax - LocResourceMin) * n / 100)
+
+                if rand.Intn(100) < LocEnergyRate {
+                    loc.Energy = total * (int64(rand.Intn(10)) + 1) / 10
+                } else {
+                    loc.Energy = 0
+                }
+
+                loc.Metal = total - loc.Energy
+            } else {
+                loc.Metal = 0
+                loc.Energy = 0
             }
 
-            if rand.Intn(100) < LocEnergyRate {
-                n := rand.Intn(100)
-                loc.Energy = int64(LocEnergyMin +
-                    (LocEnergyMax - LocEnergyMin) * n / 100)
-            }
-
-        } else {
-            num++
-            if num%20 == 0 {
-                rate++
-            }
-
-            loc.Metal = 0
-            loc.Energy = 0
+            m.IncrMetal(loc.Metal - metal)
+            m.IncrEnergy(loc.Energy - energy)
+            loc.RefreshAt = now
+            m.SaveResource(loc)
         }
-
-        m.IncrMetal(loc.Metal - metal)
-        m.IncrEnergy(loc.Energy - energy)
-        loc.RefreshAt = now
-        m.Save(loc)
     }
 }
 
@@ -177,13 +169,11 @@ func (m *mapModel) Location(x, y int64) *Location {
     return loc
 }
 
-func (m *mapModel) Save(loc *Location) bool {
+func (m *mapModel) SaveResource(loc *Location) bool {
     _, e := orm.NewStmt().
-        Update("Location", "l", "geo", "base_id",
-        "metal", "energy", "updated_at", "refresh_at").
+        Update("Location", "l", "metal", "energy", "refresh_at").
         Where("l.x = ? AND l.y = ?").
-        Exec(loc.Geo, loc.BaseId, loc.Metal, loc.Energy,
-        loc.UpdatedAt, loc.RefreshAt, loc.X, loc.Y)
+        Exec(loc.Metal, loc.Energy, loc.RefreshAt, loc.X, loc.Y)
 
     if e != nil {
         orm.L.Println(e)
@@ -193,9 +183,13 @@ func (m *mapModel) Save(loc *Location) bool {
     return true
 }
 
-func (m *mapModel) Sum(col string) int64 {
-    row := orm.D.QueryRow("SELECT SUM(" + col + ") n FROM map")
-    var n int64
-    row.Scan(&n)
-    return n
+func (m *mapModel) Sum(cols []string, nums ...interface{}) error {
+    sums := make([]string, 0, len(cols))
+    for _, col := range cols {
+        sums = append(sums, fmt.Sprintf("SUM(%s)", col))
+    }
+
+    row := orm.D.QueryRow(
+        "SELECT " + strings.Join(sums, ", ") + " FROM map")
+    return row.Scan(nums...)
 }
