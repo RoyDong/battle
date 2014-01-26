@@ -8,13 +8,13 @@ import (
 )
 
 const (
-    GeoLand = 0
-    GeoSea  = 1
+    MapGeoLand = 0
+    MapGeoSea  = 1
 
     MapSizeX = 1000
     MapSizeY = 1000
 
-    MapRefreshInterval = 0.5 * time.Second
+    MapRefreshInterval = 500 * time.Millisecond
 )
 
 var (
@@ -30,17 +30,16 @@ var (
 )
 
 type Location struct {
-    X      int64 `column:"x"`
-    Y      int64 `column:"y"`
-    Geo    int   `column:"geo"`
-    BaseId int64 `column:"base_id"`
+    X      int64 `column:"x" json:"x"`
+    Y      int64 `column:"y" json:"y"`
+    Geo    int   `column:"geo" json:"geo"`
+    BaseId int64 `column:"base_id" json:"base_id"`
 
-    Metal  int64 `column:"metal"`
-    Energy int64 `column:"energy"`
+    Metal  int64 `column:"metal" json:"metal"`
+    Energy int64 `column:"energy" json:"energy"`
 
-    CreatedAt time.Time `column:"created_at"`
-    UpdatedAt time.Time `column:"updated_at"`
-    RefreshAt time.Time `column:"refresh_at"`
+    UpdatedAt time.Time `column:"updated_at" json:"updated_at"`
+    RefreshAt time.Time `column:"refresh_at" json:"refresh_at"`
 }
 
 /**
@@ -50,24 +49,22 @@ type mapModel struct {
     *orm.Model
 
     metal   int64
-    mlocker *symc.Mutex
+    mlocker *sync.Mutex
 
     energy  int64
-    elocker *symc.Mutex
+    elocker *sync.Mutex
 }
 
-var MapModel = &mapModel{orm.NewModel("map", &Location{})}
-
-func newMapModel(model *orm.Model) *mapModel {
+func newMapModel() *mapModel {
     m := &mapModel{
-        Model:   model,
+        Model:   orm.NewModel("map", &Location{}),
         mlocker: &sync.Mutex{},
         elocker: &sync.Mutex{},
     }
 
     m.metal = m.Sum("metal")
     m.energy = m.Sum("energy")
-    go m.Refresh()
+    go m.refresh()
     return m
 }
 
@@ -95,7 +92,7 @@ func (m *mapModel) Resource() int64 {
     return m.metal + m.energy
 }
 
-func (m *mapModel) Refresh() {
+func (m *mapModel) refresh() {
     rate := LocResourceRate
     num := 0
 
@@ -107,9 +104,7 @@ func (m *mapModel) Refresh() {
             Limit(1).Query()
 
         var loc *Location
-        if e == nil && rows.Next() {
-            rows.ScanEntity(&loc)
-        } else {
+        if e != nil || rows.ScanRow(&loc) != nil {
             continue
         }
 
@@ -120,14 +115,14 @@ func (m *mapModel) Refresh() {
 
             if rand.Intn(100) < LocMetalRate {
                 n := rand.Intn(100)
-                loc.Metal = LocMetalMin +
-                    (LocMetalMax-LocMetalMin)*n/100
+                loc.Metal = int64(LocMetalMin +
+                    (LocMetalMax - LocMetalMin) * n / 100)
             }
 
             if rand.Intn(100) < LocEnergyRate {
                 n := rand.Intn(100)
-                loc.Energy = LocEnergyMin +
-                    (LocEnergyMax-LocEnergyMin)*n/100
+                loc.Energy = int64(LocEnergyMin +
+                    (LocEnergyMax - LocEnergyMin) * n / 100)
             }
 
         } else {
@@ -142,9 +137,29 @@ func (m *mapModel) Refresh() {
 
         m.IncrMetal(loc.Metal - metal)
         m.IncrEnergy(loc.Energy - energy)
-        loc.RefreshAt = time.Now()
+        loc.RefreshAt = now
         m.Save(loc)
     }
+}
+
+func (m *mapModel) Rect(x, y, r int64) []*Location {
+    rows, e := orm.NewStmt().
+        Select("l.*").From("Location", "l").
+        Where("l.x >= ? AND l.x <= ? AND l.y >= ? AND l.y <= ?").
+        Query(x - r, x + r, y - r, y + r)
+
+    locs := make([]*Location, 0)
+    if e != nil {
+        return locs
+    }
+
+    for rows.Next() {
+        var loc *Location
+        rows.ScanEntity(&loc)
+        locs = append(locs, loc)
+    }
+
+    return locs
 }
 
 func (m *mapModel) Location(x, y int64) *Location {
@@ -155,8 +170,8 @@ func (m *mapModel) Location(x, y int64) *Location {
         Where("l.x = ? AND l.y = ?").
         Query(x, y)
 
-    if e == nil && rows.Next() {
-        rows.ScanEntity(&loc)
+    if e != nil {
+        rows.ScanRow(&loc)
     }
 
     return loc
@@ -164,20 +179,23 @@ func (m *mapModel) Location(x, y int64) *Location {
 
 func (m *mapModel) Save(loc *Location) bool {
     _, e := orm.NewStmt().
-        Update("Location", "l", "geo", "base_id", "metal",
-        "energy", "created_at", "updated_at", "refresh_at").
+        Update("Location", "l", "geo", "base_id",
+        "metal", "energy", "updated_at", "refresh_at").
         Where("l.x = ? AND l.y = ?").
         Exec(loc.Geo, loc.BaseId, loc.Metal, loc.Energy,
-        loc.CreatedAt, loc.UpdatedAt, loc.RefreshAt)
+        loc.UpdatedAt, loc.RefreshAt, loc.X, loc.Y)
 
-    return e == nil
+    if e != nil {
+        orm.L.Println(e)
+        return false
+    }
+
+    return true
 }
 
-func (m *mapModel) Sum(col) int64 {
-    rows, e := orm.D.Query("SELECT SUM(" + col + ") n FROM map")
+func (m *mapModel) Sum(col string) int64 {
+    row := orm.D.QueryRow("SELECT SUM(" + col + ") n FROM map")
     var n int64
-    if e == nil && rows.Next() {
-        rows.Scan(&n)
-    }
+    row.Scan(&n)
     return n
 }

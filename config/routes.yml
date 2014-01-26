@@ -13,60 +13,16 @@
             pattern: /ws
 
 -
-    prefix: /comment
+    prefix: /map
     routes:
         -
-            name: comment_new
-            controller: comment
-            action: New
-            pattern: /new
+            name: map_scan
+            controller: map
+            action: Scan
+            pattern: /scan
+        -
+            name: map_sum
+            controller: map
+            action: Sum
+            pattern: /sum
 
--
-    prefix: /admin
-    routes:
-        -
-            name: sigunup
-            controller: admin_user
-            action: Signup
-            pattern: /signup
-
-        -
-            name: signin
-            controller: admin_user
-            action: Signin
-            pattern: /signin
-
-        - 
-            name: setting
-            controller: admin_user
-            action: Setting
-            pattern: /setting
-
-
--
-    prefix: /admin/topic
-    routes:
-        -
-            name: admin_topics
-            controller: admin_topic
-            action: List
-            pattern: /
-        
-        -
-            name: admin_topic_new
-            controller: admin_topic
-            action: New
-            pattern: /new
-        
-        -
-            name: admin_topics
-            controller: admin_topic
-            action: Show 
-            pattern: /
-        
-        -
-            name: admin_topic_edit
-            controller: admin_topic
-            action: Edit
-            pattern: /(\d+)/edit
-            keys: [id]

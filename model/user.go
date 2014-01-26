@@ -45,27 +45,13 @@ type userModel struct {
     *orm.Model
 }
 
-var UserModel = &userModel{orm.NewModel("user", new(User))}
-
 func (m *userModel) User(id int64) *User {
     var u *User
     rows, e := orm.NewStmt().Select("u.*").
         From("User", "u").Where("u.id = ?").Query(id)
 
-    if e == nil && rows.Next() {
-        rows.ScanEntity(&u)
-    }
-
-    return u
-}
-
-func (m *userModel) User(id int64) *User {
-    var u *User
-    rows, e := orm.NewStmt().Select("u.*").
-        From("User", "u").Where("u.id = ?").Query(id)
-
-    if e == nil && rows.Next() {
-        rows.ScanEntity(&u)
+    if e == nil {
+        rows.ScanRow(&u)
     }
 
     return u
@@ -76,8 +62,8 @@ func (m *userModel) UserByEmail(email string) *User {
     rows, e := orm.NewStmt().Select("u.*").
         From("User", "u").Where("u.email = ?").Query(email)
 
-    if e == nil && rows.Next() {
-        rows.ScanEntity(&u)
+    if e == nil {
+        rows.ScanRow(&u)
     }
 
     return u

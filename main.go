@@ -2,12 +2,16 @@ package main
 
 import (
     _ "github.com/go-sql-driver/mysql"
-    "github.com/roydong/battle/controller"
     "github.com/roydong/potato"
+    "github.com/roydong/battle/controller"
+    "github.com/roydong/battle/model"
 )
 
 func init() {
     potato.Init()
+
+    //init after potato
+    model.Init()
 }
 
 func main() {
@@ -17,7 +21,8 @@ func main() {
     //the map keys here must corresponds with
     //the controller configured in routes.yml
     potato.R.SetControllers(map[string]interface{}{
-        "main": new(controller.Main),
+        "main": &controller.Main{},
+        "map": &controller.Map{},
     })
 
     potato.Serve()
