@@ -13,18 +13,18 @@ const (
     MapGeoLand = 0
     MapGeoSea  = 1
 
-    MapSizeX = 1000
-    MapSizeY = 1000
-
     MapRefreshInterval = time.Second
+
+    RefreshStateOff = 0
+    RefreshStateOn  = 1
 )
 
 var (
     LocResourceRate = 5
     LocEnergyRate   = 30
 
-    LocResourceMax = 500
-    LocResourceMin = 100
+    LocResourceMax = 5000
+    LocResourceMin = 1000
 )
 
 type Location struct {
@@ -51,6 +51,8 @@ type mapModel struct {
 
     energy  int64
     elocker *sync.Mutex
+
+    RefreshState int
 }
 
 func newMapModel() *mapModel {
@@ -58,10 +60,11 @@ func newMapModel() *mapModel {
         Model:   orm.NewModel("map", &Location{}),
         mlocker: &sync.Mutex{},
         elocker: &sync.Mutex{},
+        RefreshState: RefreshStateOff,
     }
 
     m.Sum([]string{"metal", "energy"}, &m.metal, &m.energy)
-    go m.Refresh()
+    go m.refresh()
     return m
 }
 
@@ -89,8 +92,12 @@ func (m *mapModel) Resource() int64 {
     return m.metal + m.energy
 }
 
-func (m *mapModel) Refresh() {
+func (m *mapModel) refresh() {
     for now := range time.Tick(MapRefreshInterval) {
+        if m.RefreshState == RefreshStateOff {
+            continue
+        }
+
         rows, e := orm.NewStmt().
             Select("l.*").From("Location", "l").
             Where("l.base_id = 0").
@@ -134,14 +141,15 @@ func (m *mapModel) Refresh() {
     }
 }
 
-func (m *mapModel) Rect(x, y, r int64) []*Location {
+func (m *mapModel) Rect(x, y, w, h int64) []*Location {
     rows, e := orm.NewStmt().
         Select("l.*").From("Location", "l").
-        Where("l.x >= ? AND l.x <= ? AND l.y >= ? AND l.y <= ?").
-        Query(x - r, x + r, y - r, y + r)
+        Where("l.x BETWEEN ? AND ? AND l.y BETWEEN ? AND ?").
+        Query(x, x + w, y, y + h)
 
     locs := make([]*Location, 0)
     if e != nil {
+        orm.L.Println(e)
         return locs
     }
 

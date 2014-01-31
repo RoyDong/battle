@@ -1,28 +1,50 @@
 -
-    prefix: ~
+    name: ~
+    pattern: ~
     routes:
         -
-            name: index
-            controller: main
-            action: Index
+            name: main
             pattern: /
         -
-            name: ws_index
-            controller: main
-            action: Ws
-            pattern: /ws
+            name: user
+            pattern: /signin
+        -
+            name: user
+            pattern: /signup
+        -
+            name: user
+            pattern: /signout
+
 
 -
-    prefix: /map
+    name: ~
+    pattern: /map
     routes:
         -
+            name: map_main
+            pattern: /
+
+        -
             name: map_scan
-            controller: map
-            action: Scan
             pattern: /scan
+
+        -
+            name: map_rect
+            pattern: /rect
+
         -
             name: map_sum
-            controller: map
-            action: Sum
             pattern: /sum
+
+        -
+            name: map_refresh
+            pattern: /refresh
+
+-
+    name: ~
+    pattern: /base
+    routes:
+        -
+            name: base_settle_down
+            pattern: settle_down
 

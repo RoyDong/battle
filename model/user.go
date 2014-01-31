@@ -17,6 +17,8 @@ type User struct {
     Email     string    `column:"email"`
     CreatedAt time.Time `column:"created_at"`
     UpdatedAt time.Time `column:"updated_at"`
+
+    roles []*Role
 }
 
 func (u *User) SetPasswd(passwd string) {
@@ -36,6 +38,71 @@ func (u *User) SetPasswd(passwd string) {
 
 func (u *User) CheckPasswd(passwd string) bool {
     return UserModel.HashPasswd(passwd, u.Salt) == u.Passwd
+}
+
+func (u *User) AddRole(r *Role) bool {
+    return UserRoleModel.Save(u, r)
+}
+
+func (u *User) RemoveRole(r *Role) bool {
+    return UserRoleModel.Remove(u, r)
+}
+
+func (u *User) Roles() []*Role {
+    if u.roles == nil {
+        rows, e := orm.NewStmt().
+            Select("r.*").From("Role", "r").
+            InnerJoin("UserRole", "ur", "r.id = ur.role_id").
+            Where("ur.user_id = ?").
+            Query(u.Id)
+
+        roles := make([]*Role, 0)
+        if e != nil {
+            orm.L.Println(e)
+            return roles
+        }
+
+        for rows.Next() {
+            var r *Role
+            rows.ScanEntity(&r)
+            roles = append(roles, r)
+        }
+
+        u.roles = roles
+    }
+
+    return u.roles
+}
+
+func (u *User) IsGrantd(roles ...string) bool {
+    for _, r := range u.Roles() {
+        for _, name := range roles {
+            if name == r.Name {
+                return true
+            }
+        }
+    }
+
+    return false
+}
+
+func (u *User) IsGrantedAll(roles ...string) bool {
+    tags := make([]bool, len(roles))
+    for _, r := range u.Roles() {
+        for i, name := range roles {
+            if name == r.Name {
+                tags[i] = true
+            }
+        }
+    }
+
+    for _, tag := range tags {
+        if !tag {
+            return false
+        }
+    }
+
+    return true
 }
 
 /**
