@@ -5,43 +5,37 @@ import (
     "github.com/roydong/battle/model"
 )
 
-type Map struct {
-    potato.Controller
+func init() {
+    potato.SetAction("map", map_main)
+
+    potato.SetAction("map/rect", map_rect)
+
+    potato.SetAction("map/sum", map_sum)
+
+    potato.SetAction("map/refresh", map_refresh)
 }
 
-
-func (c *Map) Main() {
-
-    c.Render("map/main", nil)
+func map_main(r *potato.Request, p *potato.Response) {
+    p.Render("map/main", nil)
 }
 
-func (c *Map) Scan() {
-    x, _ := c.Request.Int64("x")
-    y, _ := c.Request.Int64("y")
-    r, _ := c.Request.Int64("r")
-
-    locs := model.MapModel.Rect(x - r, y - r, 2 * r, 2 * r)
-    c.RenderJson(locs)
-}
-
-func (c *Map) Rect() {
-    r := c.Request
+func map_rect(r *potato.Request, p *potato.Response) {
     x, _ := r.Int64("x")
     y, _ := r.Int64("y")
     w, _ := r.Int64("w")
     h, _ := r.Int64("h")
 
     locs := model.MapModel.Rect(x, y, w, h)
-    c.RenderJson(locs)
+    p.RenderJson(locs)
 }
 
-func (c *Map) Sum() {
+func map_sum(r *potato.Request, p *potato.Response) {
     m := model.MapModel
-    c.RenderJson([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
+    p.RenderJson([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
 }
 
-func (c *Map) Refresh() {
-    state, has := c.Request.Int("state")
+func map_refresh(r *potato.Request, p *potato.Response) {
+    state, has := r.Int("state")
     m := model.MapModel
 
     if !has {
@@ -54,5 +48,5 @@ func (c *Map) Refresh() {
     }
 
     m.RefreshState = state
-    c.RenderText("done")
+    p.RenderText("done")
 }

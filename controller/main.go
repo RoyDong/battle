@@ -2,9 +2,12 @@ package controller
 
 import (
     "github.com/roydong/potato"
+    "github.com/roydong/battle/model"
 )
 
-type Main struct {
-    potato.Controller
+func init() {
+    potato.SetAction("", func(r *potato.Request, p *potato.Response) {
+        user, _ := r.Session.Get("user").(*model.User)
+        p.Render("main", user)
+    })
 }
-

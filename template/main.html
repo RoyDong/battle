@@ -1,0 +1,7 @@
+{{if .Data}}
+<p>Id: <span>{{.Data.Id}}</span></p>
+<p>Name: <span>{{.Data.Name}}</span></p>
+<p>CreatedAt: <span>{{.Data.CreatedAt}}</span></p>
+{{else}}
+<a href="/signin">Please signin</a> or <a href="/signup">Please signup</a>
+{{end}}

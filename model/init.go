@@ -11,7 +11,7 @@ var RoleModel *roleModel
 var UserRoleModel *userRoleModel
 
 func init() {
-    potato.E.AddEventHandler("frame_init_end", func(args ...interface{}) {
+    potato.E.AddEventHandler("orm_init_done", func(args ...interface{}) {
         MapModel = newMapModel()
 
         UserModel = &userModel{orm.NewModel("user", &User{})}

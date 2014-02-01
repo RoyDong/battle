@@ -1,6 +1,0 @@
-package controller
-
-
-func Init() {
-
-}
