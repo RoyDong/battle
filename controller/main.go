@@ -6,8 +6,8 @@ import (
 )
 
 func init() {
-    potato.SetAction("", func(r *potato.Request, p *potato.Response) {
+    potato.SetAction(func(r *potato.Request, p *potato.Response) {
         user, _ := r.Session.Get("user").(*model.User)
         p.Render("main", user)
-    })
+    }, "")
 }

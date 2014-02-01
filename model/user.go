@@ -4,6 +4,7 @@ import (
     "crypto/rand"
     "crypto/sha512"
     "encoding/hex"
+    "github.com/roydong/potato"
     "github.com/roydong/potato/orm"
     "io"
     "time"
@@ -110,6 +111,11 @@ func (u *User) IsGrantedAll(roles ...string) bool {
  */
 type userModel struct {
     *orm.Model
+}
+
+func (m *userModel) Current(s *potato.Session) *User {
+    user, _ := s.Get("user").(*User)
+    return user
 }
 
 func (m *userModel) User(id int64) *User {
