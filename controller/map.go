@@ -1,16 +1,16 @@
 package controller
 
 import (
-    "github.com/roydong/potato"
     "github.com/roydong/battle/model"
+    pt "github.com/roydong/potato"
 )
 
 func init() {
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         p.Render("map/main", nil)
     }, "/map")
 
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         x, _ := r.Int64("x")
         y, _ := r.Int64("y")
         w, _ := r.Int64("w")
@@ -20,12 +20,12 @@ func init() {
         p.RenderJson(locs)
     }, "/map/rect")
 
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         m := model.MapModel
         p.RenderJson([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
     }, "/map/sum")
 
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         state, has := r.Int("state")
         m := model.MapModel
 

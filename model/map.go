@@ -1,10 +1,10 @@
 package model
 
 import (
+    "fmt"
     "github.com/roydong/potato/orm"
     "math/rand"
     "strings"
-    "fmt"
     "sync"
     "time"
 )
@@ -57,9 +57,9 @@ type mapModel struct {
 
 func newMapModel() *mapModel {
     m := &mapModel{
-        Model:   orm.NewModel("map", &Location{}),
-        mlocker: &sync.Mutex{},
-        elocker: &sync.Mutex{},
+        Model:        orm.NewModel("map", &Location{}),
+        mlocker:      &sync.Mutex{},
+        elocker:      &sync.Mutex{},
         RefreshState: RefreshStateOff,
     }
 
@@ -119,7 +119,7 @@ func (m *mapModel) refresh() {
             if rand.Intn(100) < LocResourceRate {
                 n := rand.Intn(100)
                 total := int64(LocResourceMin +
-                    (LocResourceMax - LocResourceMin) * n / 100)
+                    (LocResourceMax-LocResourceMin)*n/100)
 
                 if rand.Intn(100) < LocEnergyRate {
                     loc.Energy = total * (int64(rand.Intn(10)) + 1) / 10
@@ -145,7 +145,7 @@ func (m *mapModel) Rect(x, y, w, h int64) []*Location {
     rows, e := orm.NewStmt().
         Select("l.*").From("Location", "l").
         Where("l.x BETWEEN ? AND ? AND l.y BETWEEN ? AND ?").
-        Query(x, x + w, y, y + h)
+        Query(x, x+w, y, y+h)
 
     locs := make([]*Location, 0)
     if e != nil {

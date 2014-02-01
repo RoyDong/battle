@@ -1,8 +1,8 @@
 package lib
 
 import (
-    "github.com/roydong/potato"
     "github.com/roydong/battle/model"
+    "github.com/roydong/potato"
 )
 
 type Auth struct {
@@ -24,4 +24,3 @@ func (a *Auth) User() *model.User {
 func (a *Auth) SetUser(u *model.User) {
     a.user = u
 }
-

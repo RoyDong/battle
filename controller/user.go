@@ -1,14 +1,14 @@
 package controller
 
 import (
-    "time"
     "fmt"
-    "github.com/roydong/potato"
     "github.com/roydong/battle/model"
+    pt "github.com/roydong/potato"
+    "time"
 )
 
 func init() {
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         if r.Method == "POST" {
             name, _ := r.String("name")
             email, _ := r.String("email")
@@ -39,7 +39,7 @@ func init() {
         p.Render("user/signup", nil)
     }, "/signup")
 
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         if r.Method == "POST" {
             email, _ := r.String("email")
             if len(email) == 0 {
@@ -64,12 +64,12 @@ func init() {
         p.Render("user/signin", nil)
     }, "/signin")
 
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         r.Session.Set("user", nil, true)
         p.RenderText("user/signout")
     }, "/signout")
 
-    potato.SetAction(func(r *potato.Request, p *potato.Response) {
+    pt.SetAction(func(r *pt.Request, p *pt.Response) {
         id, _ := r.Int64("$1")
         var user *model.User
         if id == 0 {

@@ -1,7 +1,6 @@
 package model
 
-import (
-)
+import ()
 
 type Fort struct {
     BaseUnit
