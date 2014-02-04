@@ -21,7 +21,7 @@ func (m *userRoleModel) Save(u *User, r *Role) bool {
         Exec(u.Id, r.Id, time.Now().UnixNano())
 
     if e != nil {
-        orm.L.Println(e)
+        orm.Logger.Println(e)
         return false
     }
 
@@ -35,7 +35,7 @@ func (m *userRoleModel) Remove(u *User, r *Role) bool {
         Exec(u.Id, r.Id)
 
     if e != nil {
-        orm.L.Println(e)
+        orm.Logger.Println(e)
         return false
     }
 

@@ -1,0 +1,8 @@
+<ul>
+    {{range $u := .Data}}
+    <li>
+    <a href="/user/{{$u.Id}}">{{$u.Id}}</a>
+    <span>{{$u.Name}}</span>
+    </li>
+    {{end}}
+</ul>

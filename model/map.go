@@ -105,7 +105,7 @@ func (m *mapModel) refresh() {
             Limit(10).Query()
 
         if e != nil {
-            orm.L.Println(e)
+            orm.Logger.Println(e)
             continue
         }
 
@@ -149,7 +149,7 @@ func (m *mapModel) Rect(x, y, w, h int64) []*Location {
 
     locs := make([]*Location, 0)
     if e != nil {
-        orm.L.Println(e)
+        orm.Logger.Println(e)
         return locs
     }
 
@@ -184,7 +184,7 @@ func (m *mapModel) SaveResource(loc *Location) bool {
         Exec(loc.Metal, loc.Energy, loc.RefreshAt, loc.X, loc.Y)
 
     if e != nil {
-        orm.L.Println(e)
+        orm.Logger.Println(e)
         return false
     }
 
@@ -197,7 +197,7 @@ func (m *mapModel) Sum(cols []string, nums ...interface{}) error {
         sums = append(sums, fmt.Sprintf("SUM(%s)", col))
     }
 
-    row := orm.D.QueryRow(
+    row := orm.DB.QueryRow(
         "SELECT " + strings.Join(sums, ", ") + " FROM map")
     return row.Scan(nums...)
 }

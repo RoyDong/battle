@@ -1,17 +1,20 @@
 package model
 
 import (
-    "github.com/roydong/potato"
+    pt "github.com/roydong/potato"
     "github.com/roydong/potato/orm"
 )
 
 var MapModel *mapModel
+
 var UserModel *userModel
+
 var RoleModel *roleModel
+
 var UserRoleModel *userRoleModel
 
 func init() {
-    potato.E.AddEventHandler("orm_init_done", func(args ...interface{}) {
+    pt.AddHandler("after_orm_init", func(args ...interface{}) {
         MapModel = newMapModel()
 
         UserModel = &userModel{orm.NewModel("user", &User{})}

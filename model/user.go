@@ -4,7 +4,6 @@ import (
     "crypto/rand"
     "crypto/sha512"
     "encoding/hex"
-    "github.com/roydong/potato"
     "github.com/roydong/potato/orm"
     "io"
     "time"
@@ -59,7 +58,7 @@ func (u *User) Roles() []*Role {
 
         roles := make([]*Role, 0)
         if e != nil {
-            orm.L.Println(e)
+            orm.Logger.Println(e)
             return roles
         }
 
@@ -113,9 +112,27 @@ type userModel struct {
     *orm.Model
 }
 
-func (m *userModel) Current(s *potato.Session) *User {
-    user, _ := s.Get("user").(*User)
-    return user
+func (m *userModel) Search(key, order string, limit, offset int64) []*User {
+    key = "%"+key+"%"
+    rows, e := orm.NewStmt().
+        Select("u.*").From("User", "u").
+        Where("u.name like ? or u.email like ?").
+        OrderBy(order).
+        Limit(limit).
+        Offset(offset).
+        Query(key, key)
+
+    if e != nil {
+        orm.Logger.Println(e)
+        return nil
+    }
+    users := make([]*User, 0, limit)
+    for rows.Next() {
+        var u *User
+        rows.ScanEntity(&u)
+        users = append(users, u)
+    }
+    return users
 }
 
 func (m *userModel) User(id int64) *User {
