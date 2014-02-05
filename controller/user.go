@@ -30,7 +30,7 @@ func init() {
             }
             user.SetPasswd(passwd)
             if model.UserModel.Save(user) {
-                r.Session.Set("user", user, true)
+                r.Session.Set("user", user)
                 p.Redirect(r, "/user", 302)
                 return nil
             }
@@ -57,7 +57,7 @@ func init() {
             m := model.UserModel
             if user := m.UserByEmail(email); user != nil &&
                 user.CheckPasswd(passwd) {
-                r.Session.Set("user", user, true)
+                r.Session.Set("user", user)
                 p.Redirect(r, "/user", 302)
                 return nil
             }
@@ -70,7 +70,7 @@ func init() {
     }, "/signin")
 
     pt.SetAction(func(r *pt.Request, p *pt.Response) error {
-        r.Session.Set("user", nil, true)
+        r.Session.Set("user", nil)
         p.RenderText("user/signout")
         return nil
     }, "/signout")
