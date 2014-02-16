@@ -1,0 +1,12 @@
+map:
+    resource_max: 5000
+    resource_min: 1000
+    resource_rate: 5
+    energe_rate: 30
+
+base:
+    supply: 10
+    storage: 100
+
+stope:
+    rpm: 100

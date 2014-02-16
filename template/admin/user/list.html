@@ -1,8 +1,19 @@
-<ul>
+<h1>用户列表</h1>
+<table class="data-list-table">
+    <tr>
+        <th><input type="checkbox" /></th>
+        <th>Id</th>
+        <th>Email</th>
+        <th>Name</th>
+        <td>创建时间</td>
+    </tr>
     {{range $u := .Data}}
-    <li>
-    <a href="/user/{{$u.Id}}">{{$u.Id}}</a>
-    <span>{{$u.Name}}</span>
-    </li>
+    <tr>
+        <td><input type="checkbox"/></td>
+        <td><a href="/admin/user/{{$u.Id}}">{{$u.Id}}</a></td>
+        <td><a href="/admin/user/{{$u.Id}}">{{$u.Email}}</a></td>
+        <td>{{$u.Name}}</td>
+        <td>{{$u.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
+    </tr>
     {{end}}
-</ul>
+</table>

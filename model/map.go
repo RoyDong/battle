@@ -10,8 +10,8 @@ import (
 )
 
 const (
-    MapGeoLand = 0
-    MapGeoSea  = 1
+    MapGeoSea  = 0
+    MapGeoLand = 1
 
     MapRefreshInterval = time.Second
 
@@ -20,24 +20,59 @@ const (
 )
 
 var (
-    LocResourceRate = 5
-    LocEnergyRate   = 30
-
-    LocResourceMax = 5000
-    LocResourceMin = 1000
+    ResourceRate = 5
+    EnergyRate   = 30
+    ResourceMax = 5000
+    ResourceMin = 1000
 )
 
 type Location struct {
-    X      int64 `column:"x" json:"x"`
-    Y      int64 `column:"y" json:"y"`
+    X      int   `column:"x" json:"x"`
+    Y      int   `column:"y" json:"y"`
     Geo    int   `column:"geo" json:"geo"`
-    BaseId int64 `column:"base_id" json:"base_id"`
 
     Metal  int64 `column:"metal" json:"metal"`
     Energy int64 `column:"energy" json:"energy"`
 
     UpdatedAt time.Time `column:"updated_at" json:"updated_at"`
     RefreshAt time.Time `column:"refresh_at" json:"refresh_at"`
+
+    base *Base
+}
+
+func (loc *Location) Key() string {
+    return fmt.Sprintf("%d,%d", loc.X, loc.Y)
+}
+
+var locLocker = &sync.Mutex{}
+var lockedLocs = make(map[string]*Location)
+func (loc *Location) Lock() bool {
+    locLocker.Lock()
+    defer locLocker.Unlock()
+    if _, has := lockedLocs[loc.Key()]; has {
+        return false
+    }
+    lockedLocs[loc.Key()] = loc
+    return true
+}
+
+func (loc *Location) Unlock() {
+    delete(lockedLocs, loc.Key())
+}
+
+func (loc *Location) Base() *Base {
+    if loc.base == nil {
+        rows, e := orm.NewStmt().
+            Select("b.*").
+            From("Base", "b").
+            Where("b.x = ? AND b.y = ?").
+            Query(loc.X, loc.Y)
+
+        if e == nil {
+            rows.ScanRow(&loc.base)
+        }
+    }
+    return loc.base
 }
 
 /**
@@ -116,12 +151,12 @@ func (m *mapModel) refresh() {
             }
 
             metal, energy := loc.Metal, loc.Energy
-            if rand.Intn(100) < LocResourceRate {
+            if rand.Intn(100) < ResourceRate {
                 n := rand.Intn(100)
-                total := int64(LocResourceMin +
-                    (LocResourceMax-LocResourceMin)*n/100)
+                total := int64(ResourceMin +
+                    (ResourceMax - ResourceMin) * n / 100)
 
-                if rand.Intn(100) < LocEnergyRate {
+                if rand.Intn(100) < EnergyRate {
                     loc.Energy = total * (int64(rand.Intn(10)) + 1) / 10
                 } else {
                     loc.Energy = 0
@@ -141,7 +176,7 @@ func (m *mapModel) refresh() {
     }
 }
 
-func (m *mapModel) Rect(x, y, w, h int64) []*Location {
+func (m *mapModel) Rect(x, y, w, h int) []*Location {
     rows, e := orm.NewStmt().
         Select("l.*").From("Location", "l").
         Where("l.x BETWEEN ? AND ? AND l.y BETWEEN ? AND ?").
@@ -162,18 +197,23 @@ func (m *mapModel) Rect(x, y, w, h int64) []*Location {
     return locs
 }
 
-func (m *mapModel) Location(x, y int64) *Location {
+func (m *mapModel) Location(x, y int) *Location {
     var loc *Location
+    var base *Base
     rows, e := orm.NewStmt().
-        Select("l.*").
+        Select("l.*,b.*").
         From("Location", "l").
+        LeftJoin("Base", "b", "b.x = l.x AND b.y = l.y").
         Where("l.x = ? AND l.y = ?").
         Query(x, y)
-
     if e != nil {
-        rows.ScanRow(&loc)
+        orm.Logger.Println(e)
+        return nil
     }
-
+    rows.ScanRow(&loc, &base)
+    if base.Id > 0 {
+        loc.base = base
+    }
     return loc
 }
 

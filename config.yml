@@ -5,7 +5,8 @@ sock_file: /run/battle.socket
 port: 37221
 
 
-sql:
+db:
+    type: mysql
     host: localhost
     port: 3306
     user: root

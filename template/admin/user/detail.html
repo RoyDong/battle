@@ -1,0 +1,19 @@
+<form action="/admin/user/{{.Data.Id}}/edit" method="post">
+    <p>id: {{.Data.Id}}</p>
+    <p>Name: <input type="text" value="{{.Data.Name}}"/></p>
+    <p>email: <input type="text" value="{{.Data.Email}}"/></p>
+    <p>创建于: {{.Data.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
+</form> 
+<form action="/admin/user/{{.Data.Id}}/add_role" method="post">
+    <h3>Roles:</h3>
+    <ul>
+        {{range $r := .Data.Roles}}
+        <li><input type="text" value="{{$r.Name}}"/></li>
+        {{end}}
+    </ul>
+    <div class="add-role-box">
+        <p>Role Name: <input type="text" name="role" value=""/></p>
+        <p>Role Description: <input type="text" name="desc" value=""/></p>
+        <p><button>Add Role</button></p>
+    </div>
+</form>

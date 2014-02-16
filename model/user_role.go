@@ -16,16 +16,15 @@ type userRoleModel struct {
 }
 
 func (m *userRoleModel) Save(u *User, r *Role) bool {
-    n, e := orm.NewStmt().
+    _, e := orm.NewStmt().
         Insert("UserRole", "user_id", "role_id", "created_at").
-        Exec(u.Id, r.Id, time.Now().UnixNano())
+        Exec(u.Id, r.Id, time.Now())
 
     if e != nil {
         orm.Logger.Println(e)
         return false
     }
-
-    return n > 0
+    return true
 }
 
 func (m *userRoleModel) Remove(u *User, r *Role) bool {

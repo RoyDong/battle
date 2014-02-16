@@ -10,15 +10,17 @@ import (
 )
 
 type User struct {
-    Id        int64     `column:"id"`
-    Passwd    string    `column:"passwd"`
-    Salt      string    `column:"salt"`
-    Name      string    `column:"name"`
-    Email     string    `column:"email"`
-    CreatedAt time.Time `column:"created_at"`
-    UpdatedAt time.Time `column:"updated_at"`
+    Id        int64     `column:"id" json:"id"`
+    Passwd    string    `column:"passwd" json:"-"`
+    Salt      string    `column:"salt" json:"-"`
+    Name      string    `column:"name" json:"name"`
+    Email     string    `column:"email" json:"email"`
+    Gold      int64     `column:"gold" json:"gold"`
+    CreatedAt time.Time `column:"created_at" json:"created_at"`
+    UpdatedAt time.Time `column:"updated_at" json:"updated_at"`
 
-    roles []*Role
+    roles map[string]*Role
+    bases map[int64]*Base
 }
 
 func (u *User) SetPasswd(passwd string) {
@@ -41,36 +43,39 @@ func (u *User) CheckPasswd(passwd string) bool {
 }
 
 func (u *User) AddRole(r *Role) bool {
-    return UserRoleModel.Save(u, r)
+    ret := UserRoleModel.Save(u, r)
+    if ret && len(u.roles) > 0 {
+        u.roles[r.Name] = r
+    }
+    return ret
 }
 
 func (u *User) RemoveRole(r *Role) bool {
-    return UserRoleModel.Remove(u, r)
+    ret := UserRoleModel.Remove(u, r)
+    if ret && len(u.roles) > 0 {
+        delete(u.roles, r.Name)
+    }
+    return ret
 }
 
-func (u *User) Roles() []*Role {
+func (u *User) Roles() map[string]*Role {
     if u.roles == nil {
         rows, e := orm.NewStmt().
             Select("r.*").From("Role", "r").
             InnerJoin("UserRole", "ur", "r.id = ur.role_id").
             Where("ur.user_id = ?").
             Query(u.Id)
-
-        roles := make([]*Role, 0)
         if e != nil {
             orm.Logger.Println(e)
-            return roles
+            return nil
         }
-
+        u.roles = make(map[string]*Role)
         for rows.Next() {
             var r *Role
             rows.ScanEntity(&r)
-            roles = append(roles, r)
+            u.roles[r.Name] = r
         }
-
-        u.roles = roles
     }
-
     return u.roles
 }
 
@@ -82,7 +87,6 @@ func (u *User) IsGrantd(roles ...string) bool {
             }
         }
     }
-
     return false
 }
 
@@ -105,6 +109,40 @@ func (u *User) IsGrantedAll(roles ...string) bool {
     return true
 }
 
+func (u *User) AddBase(base *Base) {
+    if u.bases != nil {
+        u.bases[base.Id] = base
+    }
+}
+
+func (u *User) Bases() map[int64]*Base {
+    if u.bases == nil {
+        rows, e := orm.NewStmt().
+            Select("b.*").
+            From("Base", "b").
+            Where("b.user_id = ?").
+            Query(u.Id)
+        if e != nil {
+            orm.Logger.Println(e)
+            return nil
+        }
+        u.bases = make(map[int64]*Base)
+        for rows.Next() {
+            var b *Base
+            rows.ScanEntity(&b)
+            u.bases[b.Id] = b
+        }
+    }
+    return u.bases
+}
+
+func (u *User) Base(id int64) *Base{
+    if bases := u.Bases(); bases != nil {
+        return bases[id]
+    }
+    return nil
+}
+
 /**
  * user model
  */
@@ -112,16 +150,17 @@ type userModel struct {
     *orm.Model
 }
 
-func (m *userModel) Search(key, order string, limit, offset int64) []*User {
+func (m *userModel) Search(key string, order map[string]string, limit, offset int64) []*User {
     key = "%"+key+"%"
-    rows, e := orm.NewStmt().
+    stmt := orm.NewStmt().
         Select("u.*").From("User", "u").
         Where("u.name like ? or u.email like ?").
-        OrderBy(order).
         Limit(limit).
-        Offset(offset).
-        Query(key, key)
-
+        Offset(offset)
+    for k, v := range order {
+        stmt.OrderBy("u."+k, v)
+    }
+    rows, e := stmt.Query(key, key)
     if e != nil {
         orm.Logger.Println(e)
         return nil
@@ -152,10 +191,12 @@ func (m *userModel) UserByEmail(email string) *User {
     rows, e := orm.NewStmt().Select("u.*").
         From("User", "u").Where("u.email = ?").Query(email)
 
-    if e == nil {
-        rows.ScanRow(&u)
+    if e != nil {
+        orm.Logger.Println(e)
+        return nil
     }
 
+    rows.ScanRow(&u)
     return u
 }
 

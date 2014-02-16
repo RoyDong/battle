@@ -16,3 +16,15 @@ type Role struct {
 type roleModel struct {
     *orm.Model
 }
+
+func (m *roleModel) RoleByName(name string) *Role {
+    var r *Role
+    rows, e := orm.NewStmt().Select("r.*").
+        From("Role", "r").Where("r.name = ?").Query(name)
+
+    if e == nil {
+        rows.ScanRow(&r)
+    }
+
+    return r
+}

@@ -1,0 +1,13 @@
+.data-list-table {
+  border: 1px solid #666;
+}
+.data-list-table td,
+.data-list-table th {
+  border: 1px solid #999;
+}
+.add-role-box {
+  border: 1px solid #666;
+}
+body {
+  background-color: #eee;
+}

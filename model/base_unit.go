@@ -17,12 +17,10 @@ const (
 
 type BaseUnit struct {
     Id        int64     `column:"id"`
+    BaseId    int64     `column:"base_id"`
     Hp        int64     `column:"hp"`
     Armor     int64     `column:"armor"`
-    Level     int64     `column:"level"`
     State     int       `column:"state"`
-    X         int64     `column:"x"`
-    Y         int64     `column:"y"`
     CreatedAt time.Time `column:"created_at"`
     UpdatedAt time.Time `column:"updated_at"`
 
