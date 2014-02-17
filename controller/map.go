@@ -6,29 +6,26 @@ import (
 )
 
 func init() {
-    pt.SetAction(func(r *pt.Request, p *pt.Response) *pt.Error {
-        p.Render("map/main", nil)
-        return nil
+    pt.SetAction(func(r *pt.Request) *pt.Response {
+        return pt.HtmlResponse("map/main", nil)
     }, "/map")
 
-    pt.SetAction(func(r *pt.Request, p *pt.Response) *pt.Error {
+    pt.SetAction(func(r *pt.Request) *pt.Response {
         x, _ := r.Int("x")
         y, _ := r.Int("y")
         w, _ := r.Int("w")
         h, _ := r.Int("h")
 
         locs := model.MapModel.Rect(x, y, w, h)
-        p.RenderJson(locs)
-        return nil
+        return pt.JsonResponse(locs)
     }, "/map/rect")
 
-    pt.SetAction(func(r *pt.Request, p *pt.Response) *pt.Error {
+    pt.SetAction(func(r *pt.Request) *pt.Response {
         m := model.MapModel
-        p.RenderJson([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
-        return nil
+        return pt.JsonResponse([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
     }, "/map/sum")
 
-    pt.SetAction(func(r *pt.Request, p *pt.Response) *pt.Error {
+    pt.SetAction(func(r *pt.Request) *pt.Response {
         state, has := r.Int("state")
         m := model.MapModel
 
@@ -42,7 +39,6 @@ func init() {
         }
 
         m.RefreshState = state
-        p.RenderText("done")
-        return nil
+        return pt.TextResponse("done")
     }, "/map/refresh")
 }
