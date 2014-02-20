@@ -7,7 +7,7 @@ import (
 
 func init() {
     pt.SetAction(func(r *pt.Request) *pt.Response {
-        return pt.HtmlResponse("map/main", nil)
+        return r.HtmlResponse("map/main", nil)
     }, "/map")
 
     pt.SetAction(func(r *pt.Request) *pt.Response {
@@ -17,12 +17,12 @@ func init() {
         h, _ := r.Int("h")
 
         locs := model.MapModel.Rect(x, y, w, h)
-        return pt.JsonResponse(locs)
+        return r.JsonResponse(locs)
     }, "/map/rect")
 
     pt.SetAction(func(r *pt.Request) *pt.Response {
         m := model.MapModel
-        return pt.JsonResponse([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
+        return r.JsonResponse([]int64{m.Metal(), m.Energy(), int64(m.RefreshState)})
     }, "/map/sum")
 
     pt.SetAction(func(r *pt.Request) *pt.Response {
@@ -39,6 +39,6 @@ func init() {
         }
 
         m.RefreshState = state
-        return pt.TextResponse("done")
+        return r.TextResponse("done")
     }, "/map/refresh")
 }

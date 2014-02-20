@@ -15,7 +15,7 @@ func IsGrantd(session *pt.Session, roles ...string) bool {
 func init() {
     pt.SetAction(func(r *pt.Request) *pt.Response {
         if !IsGrantd(r.Session, "RoleAdmin") {
-            return pt.ErrorResponse(403, "permission denied")
+            return r.ErrorResponse(403, "permission denied")
         }
 
         key, _ := r.String("key")
@@ -45,37 +45,37 @@ func init() {
             UserModel.
             Search(key, m, size, (page - 1) * size)
 
-        return pt.HtmlResponse("admin/user/list", users)
+        return r.HtmlResponse("admin/user/list", users)
     }, "/admin/user")
 
     pt.SetAction(func(r *pt.Request) *pt.Response {
         id, _ := r.Int64("$1")
         user := model.UserModel.User(id)
         if user == nil {
-            return pt.ErrorResponse(404, "user not found")
+            return r.ErrorResponse(404, "user not found")
         }
 
-        return pt.HtmlResponse("admin/user/detail", user)
+        return r.HtmlResponse("admin/user/detail", user)
     }, `/admin/user/(\d+)`)
 
     pt.SetAction(func(r *pt.Request) *pt.Response {
         if r.Method != "post" {
-            return pt.ErrorResponse(400, "must be post")
+            return r.ErrorResponse(400, "must be post")
         }
         id, _ := r.Int64("$1")
         user := model.UserModel.User(id)
         if user == nil {
-            return pt.ErrorResponse(404, "user not found")
+            return r.ErrorResponse(404, "user not found")
         }
 
         desc, _ := r.String("desc")
         name, _ := r.String("role")
         if name == "" {
-            return pt.ErrorResponse(400, "need a role name")
+            return r.ErrorResponse(400, "need a role name")
         }
 
         if user.IsGrantd(name) {
-            return pt.RedirectResponse(fmt.Sprintf("/admin/user/%d", id), 302)
+            return r.RedirectResponse(fmt.Sprintf("/admin/user/%d", id), 302)
         }
 
         role := model.RoleModel.RoleByName(name)
@@ -87,13 +87,13 @@ func init() {
                 UpdatedAt: time.Now(),
             }
             if !model.RoleModel.Save(role) {
-                return pt.ErrorResponse(500, "can't save role " + name)
+                return r.ErrorResponse(500, "can't save role " + name)
             }
         }
 
         if user.AddRole(role) {
-            return pt.RedirectResponse(fmt.Sprintf("/admin/user/%d", id), 302)
+            return r.RedirectResponse(fmt.Sprintf("/admin/user/%d", id), 302)
         }
-        return pt.ErrorResponse(500, "can't add role " + name + " to user")
+        return r.ErrorResponse(500, "can't add role " + name + " to user")
     }, `/admin/user/(\d+)/add_role`)
 }
