@@ -4,11 +4,12 @@ env: dev
 sock_file: /run/battle.socket
 port: 37221
 
-
 db:
-    type: mysql
-    host: localhost
-    port: 3306
-    user: root
-    pass: d
-    dbname: battle
+    default: 
+        type: mysql
+        dsn:  root:d@(localhost:3306)/battle
+
+    hehe: 
+        type: mysql
+        dsn:  root:d@(localhost:3306)/battle
+

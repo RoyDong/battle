@@ -7,6 +7,7 @@ import (
     "strings"
     "sync"
     "time"
+    "log"
 )
 
 const (
@@ -62,7 +63,7 @@ func (loc *Location) Unlock() {
 
 func (loc *Location) Base() *Base {
     if loc.base == nil {
-        rows, e := orm.NewStmt().
+        rows, e := orm.NewStmt("").
             Select("b.*").
             From("Base", "b").
             Where("b.x = ? AND b.y = ?").
@@ -133,14 +134,14 @@ func (m *mapModel) refresh() {
             continue
         }
 
-        rows, e := orm.NewStmt().
+        rows, e := orm.NewStmt("").
             Select("l.*").From("Location", "l").
             Where("l.base_id = 0").
             Asc("l.refresh_at").Asc("l.x").Asc("l.y").
             Limit(10).Query()
 
         if e != nil {
-            orm.Logger.Println(e)
+            log.Println(e)
             continue
         }
 
@@ -177,14 +178,14 @@ func (m *mapModel) refresh() {
 }
 
 func (m *mapModel) Rect(x, y, w, h int) []*Location {
-    rows, e := orm.NewStmt().
+    rows, e := orm.NewStmt("").
         Select("l.*").From("Location", "l").
         Where("l.x BETWEEN ? AND ? AND l.y BETWEEN ? AND ?").
         Query(x, x+w, y, y+h)
 
     locs := make([]*Location, 0)
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return locs
     }
 
@@ -200,14 +201,14 @@ func (m *mapModel) Rect(x, y, w, h int) []*Location {
 func (m *mapModel) Location(x, y int) *Location {
     var loc *Location
     var base *Base
-    rows, e := orm.NewStmt().
+    rows, e := orm.NewStmt("").
         Select("l.*,b.*").
         From("Location", "l").
         LeftJoin("Base", "b", "b.x = l.x AND b.y = l.y").
         Where("l.x = ? AND l.y = ?").
         Query(x, y)
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return nil
     }
     rows.ScanRow(&loc, &base)
@@ -218,13 +219,13 @@ func (m *mapModel) Location(x, y int) *Location {
 }
 
 func (m *mapModel) SaveResource(loc *Location) bool {
-    _, e := orm.NewStmt().
+    _, e := orm.NewStmt("").
         Update("Location", "l", "metal", "energy", "refresh_at").
         Where("l.x = ? AND l.y = ?").
         Exec(loc.Metal, loc.Energy, loc.RefreshAt, loc.X, loc.Y)
 
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return false
     }
 
@@ -237,7 +238,7 @@ func (m *mapModel) Sum(cols []string, nums ...interface{}) error {
         sums = append(sums, fmt.Sprintf("SUM(%s)", col))
     }
 
-    row := orm.DB.QueryRow(
+    row := orm.SqlDB("").QueryRow(
         "SELECT " + strings.Join(sums, ", ") + " FROM map")
     return row.Scan(nums...)
 }

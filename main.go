@@ -10,5 +10,5 @@ import (
 
 func main() {
     potato.Init()
-    potato.Serve()
+    potato.Run()
 }

@@ -5,6 +5,7 @@ import (
     "crypto/sha512"
     "encoding/hex"
     "github.com/roydong/potato/orm"
+    "log"
     "io"
     "time"
 )
@@ -60,13 +61,13 @@ func (u *User) RemoveRole(r *Role) bool {
 
 func (u *User) Roles() map[string]*Role {
     if u.roles == nil {
-        rows, e := orm.NewStmt().
+        rows, e := orm.NewStmt("").
             Select("r.*").From("Role", "r").
             InnerJoin("UserRole", "ur", "r.id = ur.role_id").
             Where("ur.user_id = ?").
             Query(u.Id)
         if e != nil {
-            orm.Logger.Println(e)
+            log.Println(e)
             return nil
         }
         u.roles = make(map[string]*Role)
@@ -117,13 +118,13 @@ func (u *User) AddBase(base *Base) {
 
 func (u *User) Bases() map[int64]*Base {
     if u.bases == nil {
-        rows, e := orm.NewStmt().
+        rows, e := orm.NewStmt("").
             Select("b.*").
             From("Base", "b").
             Where("b.user_id = ?").
             Query(u.Id)
         if e != nil {
-            orm.Logger.Println(e)
+            log.Println(e)
             return nil
         }
         u.bases = make(map[int64]*Base)
@@ -152,7 +153,7 @@ type userModel struct {
 
 func (m *userModel) Search(key string, order map[string]string, limit, offset int64) []*User {
     key = "%"+key+"%"
-    stmt := orm.NewStmt().
+    stmt := orm.NewStmt("").
         Select("u.*").From("User", "u").
         Where("u.name like ? or u.email like ?").
         Limit(limit).
@@ -162,7 +163,7 @@ func (m *userModel) Search(key string, order map[string]string, limit, offset in
     }
     rows, e := stmt.Query(key, key)
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return nil
     }
     users := make([]*User, 0, limit)
@@ -176,7 +177,7 @@ func (m *userModel) Search(key string, order map[string]string, limit, offset in
 
 func (m *userModel) User(id int64) *User {
     var u *User
-    rows, e := orm.NewStmt().Select("u.*").
+    rows, e := orm.NewStmt("").Select("u.*").
         From("User", "u").Where("u.id = ?").Query(id)
 
     if e == nil {
@@ -188,11 +189,11 @@ func (m *userModel) User(id int64) *User {
 
 func (m *userModel) UserByEmail(email string) *User {
     var u *User
-    rows, e := orm.NewStmt().Select("u.*").
+    rows, e := orm.NewStmt("").Select("u.*").
         From("User", "u").Where("u.email = ?").Query(email)
 
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return nil
     }
 
@@ -201,7 +202,7 @@ func (m *userModel) UserByEmail(email string) *User {
 }
 
 func (m *userModel) Exists(email string) bool {
-    n, _ := orm.NewStmt().Count("User", "u").
+    n, _ := orm.NewStmt("").Count("User", "u").
         Where("u.email = ?").Exec(email)
 
     return n > 0

@@ -4,6 +4,7 @@ import (
     pt "github.com/roydong/potato"
     "github.com/roydong/potato/orm"
     "github.com/roydong/potato/lib"
+    "log"
 )
 
 var (
@@ -36,7 +37,7 @@ func init() {
     pt.AddHandler("after_init", func(args ...interface{}) {
         Conf = lib.NewTree()
         if e := Conf.LoadYaml(pt.ConfDir + "model.yml", true); e != nil {
-            pt.Logger.Fatal(e)
+            log.Fatal(e)
         }
 
         if v, has := Conf.Int("map.resource_max"); has {
@@ -61,6 +62,7 @@ func init() {
         RoleModel = &roleModel{orm.NewModel("role", &Role{})}
 
         UserRoleModel = &userRoleModel{orm.NewModel("user_role", &UserRole{})}
+
         BaseModel = &baseModel{orm.NewModel("base", &Base{})}
 
         CenterModel = &centerModel{orm.NewModel("main", &Center{})}

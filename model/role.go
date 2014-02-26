@@ -19,7 +19,7 @@ type roleModel struct {
 
 func (m *roleModel) RoleByName(name string) *Role {
     var r *Role
-    rows, e := orm.NewStmt().Select("r.*").
+    rows, e := orm.NewStmt("").Select("r.*").
         From("Role", "r").Where("r.name = ?").Query(name)
 
     if e == nil {

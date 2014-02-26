@@ -4,6 +4,7 @@ import (
     "github.com/roydong/potato/orm"
     "fmt"
     "time"
+    "log"
 )
 
 type Base struct {
@@ -54,7 +55,7 @@ type baseModel struct {
 
 
 func baseQueryStmt() *orm.Stmt {
-    return orm.NewStmt().
+    return orm.NewStmt("").
         Select("b.*, l.*, c.*, a.*, r.*, s.*, t.*, o.*").
         From("Base", "b").
         InnerJoin("Location", "l", "l.x = b.x AND l.y = b.y").
@@ -79,7 +80,7 @@ func scanBaseEntity(rows *orm.Rows) *Base {
     )
     e := rows.ScanRow(&b, &l, &c, &a, &r, &s, &t, &o)
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return nil
     }
     b.location = l
@@ -119,7 +120,7 @@ func scanBaseEntity(rows *orm.Rows) *Base {
 func (m *baseModel) Base(id int64) *Base {
     rows, e := baseQueryStmt().Where("b.id = ?").Query(id)
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return nil
     }
     return scanBaseEntity(rows)
@@ -128,7 +129,7 @@ func (m *baseModel) Base(id int64) *Base {
 func (m *baseModel) BaseByXY(x, y int64) *Base {
     rows, e := baseQueryStmt().Where("b.x = ? AND b.y = ?").Query(x, y)
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return nil
     }
     return scanBaseEntity(rows)

@@ -3,6 +3,7 @@ package model
 import (
     "github.com/roydong/potato/orm"
     "time"
+    "log"
 )
 
 type UserRole struct {
@@ -16,25 +17,25 @@ type userRoleModel struct {
 }
 
 func (m *userRoleModel) Save(u *User, r *Role) bool {
-    _, e := orm.NewStmt().
+    _, e := orm.NewStmt("").
         Insert("UserRole", "user_id", "role_id", "created_at").
         Exec(u.Id, r.Id, time.Now())
 
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return false
     }
     return true
 }
 
 func (m *userRoleModel) Remove(u *User, r *Role) bool {
-    _, e := orm.NewStmt().
+    _, e := orm.NewStmt("").
         Delete("UserRole").
         Where("user_id = ? AND role_id = ?").
         Exec(u.Id, r.Id)
 
     if e != nil {
-        orm.Logger.Println(e)
+        log.Println(e)
         return false
     }
 

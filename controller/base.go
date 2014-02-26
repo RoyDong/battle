@@ -1,8 +1,9 @@
 package controller
 
 import (
-    "github.com/roydong/battle/model"
     pt "github.com/roydong/potato"
+    "github.com/roydong/battle/model"
+    "fmt"
 )
 
 func init() {
@@ -41,4 +42,11 @@ func init() {
         }
         return r.ErrorResponse(500, "can't save base to db")
     }, "/base/born")
+
+    pt.WsaMap["test"] = func(wsr *pt.Wsr) string {
+        aa, _ := wsr.String("a")
+        ii, _ := wsr.String("i")
+        ff, _ := wsr.String("f")
+        return fmt.Sprintf("%v, %v, %v", aa, ii, ff)
+    }
 }
