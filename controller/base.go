@@ -43,10 +43,11 @@ func init() {
         return r.ErrorResponse(500, "can't save base to db")
     }, "/base/born")
 
-    pt.WsaMap["test"] = func(wsr *pt.Wsr) string {
-        aa, _ := wsr.String("a")
-        ii, _ := wsr.String("i")
-        ff, _ := wsr.String("f")
-        return fmt.Sprintf("%v, %v, %v", aa, ii, ff)
+    pt.WsaMap["test"] = func(wsm *pt.Wsm) {
+        aa, _ := wsm.String("a")
+        ii, _ := wsm.String("i")
+        ff, _ := wsm.String("f")
+        fmt.Printf("%v, %v, %v\n", aa, ii, ff)
+        wsm.Send("test", map[string]interface{}{"aa": 1}, nil)
     }
 }
